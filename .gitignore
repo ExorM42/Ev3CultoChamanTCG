@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.test-build/
+coverage/
+*.log
+backend/target/
+backend/data/
+entrega_frontend.zip
+entrega_backend.zip

@@ -1,0 +1,15 @@
+[Unit]
+Description=Culto Chaman API (Spring Boot)
+After=network.target mysqld.service
+
+[Service]
+User=cultochaman
+EnvironmentFile=/etc/cultochaman/backend.env
+WorkingDirectory=/opt/cultochaman
+ExecStart=/usr/bin/java -Xmx384m -jar /opt/cultochaman/app.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
