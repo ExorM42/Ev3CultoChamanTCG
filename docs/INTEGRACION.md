@@ -2,7 +2,7 @@
 
 ## Arquitectura
 
-El navegador ejecuta React y se comunica por HTTP/JSON con Spring Boot en `http://localhost:8081/api`. Spring MVC valida solicitudes, Spring Security verifica JWT y roles, Spring Data JPA persiste entidades en H2 (desarrollo) o MySQL (producción, perfil `prod`). La firma JWT usa una clave HMAC configurada por entorno. El navegador no puede asignar el rol durante el registro: el servidor crea todas las cuentas nuevas como `USER`.
+El navegador ejecuta React y se comunica por HTTP/JSON con Spring Boot. En local la API es `http://localhost:8081/api`; en la EC2 configurada es `http://100.52.124.23:8081/api`. Spring MVC valida solicitudes, Spring Security verifica JWT y roles, Spring Data JPA persiste entidades en H2 (desarrollo) o MySQL (producción, perfil `prod`). La firma JWT usa una clave HMAC configurada por entorno. El navegador no puede asignar el rol durante el registro: el servidor crea todas las cuentas nuevas como `USER`.
 
 ```mermaid
 flowchart LR

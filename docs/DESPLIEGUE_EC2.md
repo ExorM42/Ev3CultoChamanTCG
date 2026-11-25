@@ -25,7 +25,7 @@ Reglas de entrada (inbound):
 
 ## 2. Elastic IP
 
-EC2 → Elastic IPs → *Allocate* → *Associate* con tu instancia. Anota la IP (`<ELASTIC_IP>`).
+EC2 → Elastic IPs → *Allocate* → *Associate* con tu instancia. La IP pública configurada para este proyecto es `100.52.124.23`.
 
 ## 3. Conectarte
 
@@ -36,7 +36,7 @@ EC2 → Elastic IPs → *Allocate* → *Associate* con tu instancia. Anota la IP
 cd %USERPROFILE%\Downloads
 icacls labsuser.pem /inheritance:r
 icacls labsuser.pem /grant:r "%USERNAME%:R"
-ssh -i labsuser.pem ec2-user@IP_PUBLICA
+ssh -i labsuser.pem ec2-user@100.52.124.23
 ```
 (`chmod 400` no existe en Windows; los dos `icacls` hacen lo mismo. No escribas los `< >`.)
 
@@ -76,7 +76,7 @@ Antes de lanzar el JAR, define las variables (cambia las claves; sin ellas se us
 export JWT_SECRET="$(openssl rand -base64 48)"
 export ADMIN_EMAIL=admin@cultochaman.cl
 export ADMIN_PASSWORD='Admin_2026!'
-export FRONTEND_ORIGIN=http://localhost:5173
+export FRONTEND_ORIGIN=http://100.52.124.23
 export SPRING_H2_CONSOLE_ENABLED=false
 
 cd ~/CultoChamanTCGFullStack/backend/target
@@ -94,19 +94,21 @@ tail -f ~/CultoChamanTCGFullStack/backend/target/app.log     # Ctrl+C para salir
 ```
 Busca `Tomcat started on port 8081`.
 
+El frontend publicado queda en `http://100.52.124.23` y la API en `http://100.52.124.23:8081/api`.
+
 ## 7. Probar la API (Postman o navegador)
 
 | Método | URL | Body |
 | --- | --- | --- |
-| GET | `http://<ELASTIC_IP>:8081/api/products` | — |
-| GET | `http://<ELASTIC_IP>:8081/api/products/pikachu-v` | — |
-| POST | `http://<ELASTIC_IP>:8081/api/auth/login` | `{"email":"admin@cultochaman.cl","password":"Admin_2026!"}` |
-| POST | `http://<ELASTIC_IP>:8081/api/admin/products` | JSON del producto, header `Authorization: Bearer <token>` |
-| PUT | `http://<ELASTIC_IP>:8081/api/admin/products/{id}` | JSON, con token |
-| DELETE | `http://<ELASTIC_IP>:8081/api/admin/products/{id}` | con token |
-| POST | `http://<ELASTIC_IP>:8081/api/orders` | `{"items":[{"productId":"pikachu-v","quantity":1}]}` con token |
+| GET | `http://100.52.124.23:8081/api/products` | — |
+| GET | `http://100.52.124.23:8081/api/products/pikachu-v` | — |
+| POST | `http://100.52.124.23:8081/api/auth/login` | `{"email":"admin@cultochaman.cl","password":"Admin_2026!"}` |
+| POST | `http://100.52.124.23:8081/api/admin/products` | JSON del producto, header `Authorization: Bearer <token>` |
+| PUT | `http://100.52.124.23:8081/api/admin/products/{id}` | JSON, con token |
+| DELETE | `http://100.52.124.23:8081/api/admin/products/{id}` | con token |
+| POST | `http://100.52.124.23:8081/api/orders` | `{"items":[{"productId":"pikachu-v","quantity":1}]}` con token |
 
-Swagger: `http://<ELASTIC_IP>:8081/swagger-ui.html` (o `/swagger-ui/index.html`). Haz login, copia el campo `token` y úsalo en **Authorize**.
+Swagger: `http://100.52.124.23:8081/swagger-ui.html` (o `/swagger-ui/index.html`). Haz login, copia el campo `token` y úsalo en **Authorize**.
 
 ## 8. Actualizar después de un cambio
 

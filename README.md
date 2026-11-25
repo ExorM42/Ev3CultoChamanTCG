@@ -23,7 +23,7 @@ npm ci
 npm run dev
 ```
 
-Abre `http://127.0.0.1:5173`. Swagger UI: `http://localhost:8081/swagger-ui.html`; OpenAPI JSON: `http://localhost:8081/v3/api-docs`. H2 Console: `http://localhost:8081/h2-console` (JDBC URL `jdbc:h2:file:./data/cultochaman`, usuario `sa`, contraseña vacía en desarrollo).
+Abre `http://127.0.0.1:5173`. En EC2, la API pública está en `http://100.52.124.23:8081/api` y Swagger UI en `http://100.52.124.23:8081/swagger-ui.html`. En local, Swagger UI: `http://localhost:8081/swagger-ui.html`; OpenAPI JSON: `http://localhost:8081/v3/api-docs`. H2 Console: `http://localhost:8081/h2-console` (JDBC URL `jdbc:h2:file:./data/cultochaman`, usuario `sa`, contraseña vacía en desarrollo).
 
 La base se crea en `backend/data/` al iniciar. En el primer arranque se cargan las ocho cartas del frontend y un administrador de demostración. Credenciales iniciales locales: `admin@cultochaman.cl` / `Admin123!`. Cámbialas con `ADMIN_EMAIL` y `ADMIN_PASSWORD`; antes de desplegar, configura también un `JWT_SECRET` aleatorio de al menos 32 bytes, `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` y `FRONTEND_ORIGIN`. El perfil H2 y la consola están habilitados para la demostración local, no como configuración de producción.
 
@@ -51,4 +51,4 @@ Pruebas de integración backend: `cd backend && mvn test`. `ApiIntegrationTest` 
 
 ## Despliegue
 
-Perfil `prod` con MySQL y guía paso a paso para AWS EC2 (incluye RDS, Nginx, systemd y HTTPS) en `docs/DESPLIEGUE_EC2.md`; archivos en `deploy/`.
+Frontend: `http://100.52.124.23`. API: `http://100.52.124.23:8081/api`. Swagger: `http://100.52.124.23:8081/swagger-ui.html`. El frontend publicado usa la API de esta EC2 mediante `public/config.js`. Perfil `prod` con MySQL y guía paso a paso para AWS EC2 (incluye RDS, Nginx, systemd y HTTPS) en `docs/DESPLIEGUE_EC2.md`; archivos en `deploy/`.
