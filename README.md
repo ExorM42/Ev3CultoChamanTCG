@@ -52,3 +52,12 @@ Pruebas de integración backend: `cd backend && mvn test`. `ApiIntegrationTest` 
 ## Despliegue
 
 Frontend: `http://100.52.124.23`. API: `http://100.52.124.23:8081/api`. Swagger: `http://100.52.124.23:8081/swagger-ui.html`. El frontend publicado usa la API de esta EC2 mediante `public/config.js`. Perfil `prod` con MySQL y guía paso a paso para AWS EC2 (incluye RDS, Nginx, systemd y HTTPS) en `docs/DESPLIEGUE_EC2.md`; archivos en `deploy/`.
+
+## Colección Postman
+
+Importa `postman/CultoChaman.postman_collection.json` y los entornos `postman/CultoChaman-EC2.postman_environment.json` / `postman/CultoChaman-Local.postman_environment.json`. Selecciona **Culto Chaman EC2** para `http://100.52.124.23:8081` o **Culto Chaman Local** para `http://localhost:8081`. La variable `adminPassword` de EC2 queda vacía para ingresar la clave configurada en esa instancia; en local el entorno usa `Admin123!`. Si se cambió la clave, actualiza `adminPassword` en Postman. La colección obtiene access/refresh tokens al iniciar sesión y guarda el id del pedido al crearlo.
+
+
+Prueba en este orden: **Health check**, **Login administrador demo** (o registro y login USER), catálogo, crear pedido, consultar/cancelar pedido. Para probar CRUD ADMIN, ejecuta crear producto, actualizar producto y eliminar producto en ese orden. La colección incluye las rutas de usuarios ADMIN; `userId` se captura al listar cuando el entorno contiene `userEmail`.
+
+Las rutas administrativas requieren el token ADMIN. El endpoint de pedidos modifica stock; cancelar un pedido válido devuelve stock. El carrito web sigue siendo una demostración local.

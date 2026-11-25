@@ -1,0 +1,656 @@
+{
+  "info": {
+    "_postman_id": "5ceb93fa-5a95-4c27-b150-a098ae4c497b",
+    "name": "Culto Chamán TCG — API REST",
+    "description": "Colección para probar los endpoints principales de Culto Chamán TCG. Importa también el entorno Culto Chaman EC2. Por defecto utiliza la EC2 http://100.52.124.23:8081; puedes cambiar baseUrl en el entorno para pruebas locales. Las solicitudes ADMIN requieren el usuario admin demo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "apiPrefix",
+      "value": "/api"
+    },
+    {
+      "key": "productId",
+      "value": "pikachu-v"
+    },
+    {
+      "key": "productIdTest",
+      "value": "postman-producto-prueba"
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "orderId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 · Salud",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/health",
+            "description": "Estado de salud del backend; endpoint Actuator fuera del prefijo /api.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 · Autenticación",
+      "item": [
+        {
+          "name": "Registrar usuario USER",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/auth/register",
+            "description": "Crea una cuenta USER. Correo de prueba usa {{$timestamp}} para evitar conflicto.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Usuario Postman\",\n  \"email\": \"postman.{{$timestamp}}@ejemplo.cl\",\n  \"password\": \"Prueba123!\",\n  \"phone\": \"+56912345678\",\n  \"region\": \"Valparaíso\",\n  \"commune\": \"Viña del Mar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Registro responde 201\", function () { pm.response.to.have.status(201); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"userEmail\", data.email);",
+                  "pm.environment.set(\"userRole\", data.role);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login administrador demo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/auth/login",
+            "description": "Guarda token y refreshToken en el entorno Postman.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login responde 200\", function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"token\", data.token);",
+                  "pm.environment.set(\"refreshToken\", data.refreshToken);",
+                  "pm.environment.set(\"loggedEmail\", data.email);",
+                  "pm.environment.set(\"loggedRole\", data.role);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login usuario registrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/auth/login",
+            "description": "Registra un usuario con la solicitud anterior antes de ejecutar.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login responde 200\", function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"token\", data.token);",
+                  "pm.environment.set(\"refreshToken\", data.refreshToken);",
+                  "pm.environment.set(\"loggedEmail\", data.email);",
+                  "pm.environment.set(\"loggedRole\", data.role);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar tokens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/auth/refresh",
+            "description": "Renueva tokens usando refreshToken válido.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Refresh responde 200\", function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"token\", data.token);",
+                  "pm.environment.set(\"refreshToken\", data.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mi perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/auth/me",
+            "description": "Devuelve el perfil asociado al token actual.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Productos",
+      "item": [
+        {
+          "name": "Listar catálogo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/products",
+            "description": "Catálogo público.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Filtrar catálogo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/products?tipo=Fuego&q=Charizard",
+            "description": "Filtros opcionales por tipo y texto en nombre.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Detalle de carta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/products/{{productId}}",
+            "description": "Consulta una carta por id.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Crear producto (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/products",
+            "description": "Crea producto; envía token ADMIN. El ID debe ser único.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productIdTest}}\",\n  \"nombre\": \"Producto Postman\",\n  \"tipo\": \"Normal\",\n  \"atributo\": \"Prueba API\",\n  \"descripcion\": \"Producto temporal para validar CRUD desde Postman.\",\n  \"precio\": 1000,\n  \"imagen\": \"https://example.com/carta.png\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Producto creado\", function () { pm.response.to.have.status(201); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"productIdTest\", data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/products/{{productIdTest}}",
+            "description": "Actualiza el producto temporal creado por la solicitud anterior.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productIdTest}}\",\n  \"nombre\": \"Producto Postman actualizado\",\n  \"tipo\": \"Normal\",\n  \"atributo\": \"Prueba API\",\n  \"descripcion\": \"Producto temporal actualizado desde Postman.\",\n  \"precio\": 1200,\n  \"imagen\": \"https://example.com/carta.png\",\n  \"stock\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar producto (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/products/{{productIdTest}}",
+            "description": "Elimina el producto temporal creado por la colección. Ejecutar después de crear producto.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 · Pedidos",
+      "item": [
+        {
+          "name": "Crear pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/orders",
+            "description": "Envía ids y cantidades; el backend calcula precios y valida stock. Guarda orderId de respuesta.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 1\n    }\n  ],\n  \"coupon\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Pedido creado\", function () { pm.response.to.have.status(201); });",
+                  "const data = pm.response.json();",
+                  "pm.environment.set(\"orderId\", String(data.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar mis pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/orders",
+            "description": "Lista pedidos del usuario autenticado.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de pedido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/orders/{{orderId}}",
+            "description": "El usuario dueño o ADMIN consulta el detalle.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancelar pedido",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/orders/{{orderId}}/cancel",
+            "description": "Cancelar pedido propio devuelve stock si la transición es válida.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todos los pedidos (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/orders",
+            "description": "Lista pedidos; requiere ADMIN.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado pedido (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/orders/{{orderId}}/status",
+            "description": "Transiciones permitidas: PENDING→PAID/CANCELLED; PAID→SHIPPED/CANCELLED.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PAID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 · Administración de usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/users",
+            "description": "Perfiles sin hashes de contraseña.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const users = pm.response.json();",
+                  "const email = pm.environment.get(\"userEmail\");",
+                  "const found = users.find((u) => u.email === email);",
+                  "if (found) pm.environment.set(\"userId\", String(found.id));",
+                  "pm.test(\"Listado de usuarios responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/users/{{userId}}",
+            "description": "Consultar por ID. Define userId luego de revisar el listado.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cambiar rol (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/users/{{userId}}/role",
+            "description": "El rol permitido es USER o ADMIN; no se puede cambiar el propio rol.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"USER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}{{apiPrefix}}/admin/users/{{userId}}",
+            "description": "No se puede eliminar la cuenta ADMIN autenticada.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
